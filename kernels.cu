@@ -46,3 +46,35 @@ __global__ void blur_naive_31(
     output[out + 1] = (unsigned char)(g / count);
     output[out + 2] = (unsigned char)(b / count);
 }
+
+// Merge kernel - combines original and blurred images based on a mask
+// This creates the bokeh effect: sharp foreground, blurred background
+__global__ void merge_mask(
+    unsigned char* orig,
+    unsigned char* blur,
+    unsigned char* mask,
+    unsigned char* out,
+    int w, int h, int c,
+    unsigned char threshold)
+{
+    // Get the pixel position this thread is responsible for
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= w || y >= h) return;
+
+    int id = (y * w + x) * c;
+    int mid = (y * w + x);
+
+    // Decision: use original if mask value is above threshold (foreground),
+    // otherwise use blurred version (background)
+    if (mask[mid] > threshold) {
+        out[id]     = orig[id];
+        out[id + 1] = orig[id + 1];
+        out[id + 2] = orig[id + 2];
+    } else {
+        out[id]     = blur[id];
+        out[id + 1] = blur[id + 1];
+        out[id + 2] = blur[id + 2];
+    }
+}
