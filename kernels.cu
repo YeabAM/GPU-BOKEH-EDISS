@@ -47,6 +47,81 @@ __global__ void blur_naive_31(
     output[out + 2] = (unsigned char)(b / count);
 }
 
+
+__global__ void blur_shared_31(
+    unsigned char* input,
+    unsigned char* output,
+    int w, int h, int c)
+{
+    // Shared memory tile including halo for 31x31 blur
+    __shared__ unsigned char tile[TILE_W * TILE_H * 3];
+
+    // Block origin in global image coordinates
+    int bx = blockIdx.x * 16;
+    int by = blockIdx.y * 16;
+
+    // Thread indices within the block
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+
+    // Load input image region (including halo) into shared memory
+    for (int yy = ty; yy < TILE_H; yy += blockDim.y) {
+        for (int xx = tx; xx < TILE_W; xx += blockDim.x) {
+
+            int gx = bx + xx - RADIUS;
+            int gy = by + yy - RADIUS;
+
+            // Clamp global coordinates at image boundaries
+            if (gx < 0) gx = 0;
+            if (gy < 0) gy = 0;
+            if (gx >= w) gx = w - 1;
+            if (gy >= h) gy = h - 1;
+
+            int in_idx = (gy * w + gx) * 3;
+            int t_idx  = (yy * TILE_W + xx) * 3;
+
+            // Copy RGB values into shared memory
+            tile[t_idx]     = input[in_idx];
+            tile[t_idx + 1] = input[in_idx + 1];
+            tile[t_idx + 2] = input[in_idx + 2];
+        }
+    }
+
+    // Ensure all threads have loaded shared memory
+    __syncthreads();
+
+    // Compute output pixel coordinates
+    int x = bx + tx;
+    int y = by + ty;
+
+    if (x >= w || y >= h) return;
+
+    float r = 0, g = 0, b = 0;
+
+    // Apply 31x31 blur using shared memory
+    for (int dy = -RADIUS; dy <= RADIUS; dy++) {
+        for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+
+            int nx = tx + dx + RADIUS;
+            int ny = ty + dy + RADIUS;
+
+            int t_idx = (ny * TILE_W + nx) * 3;
+
+            r += tile[t_idx];
+            g += tile[t_idx + 1];
+            b += tile[t_idx + 2];
+        }
+    }
+
+    // Write blurred RGB values to output image
+    int out_idx = (y * w + x) * 3;
+    output[out_idx]     = (unsigned char)(r / (KSIZE * KSIZE));  // R
+    output[out_idx + 1] = (unsigned char)(g / (KSIZE * KSIZE));  // G
+    output[out_idx + 2] = (unsigned char)(b / (KSIZE * KSIZE));  // B
+}
+
+
+
 // Merge kernel - combines original and blurred images based on a mask
 // This creates the bokeh effect: sharp foreground, blurred background
 __global__ void merge_mask(
