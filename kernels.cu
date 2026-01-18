@@ -153,3 +153,101 @@ __global__ void merge_mask(
         out[id + 2] = blur[id + 2];
     }
 }
+
+// Horizontal pass: blur along X axis, output to temp buffer
+__global__ void blur_separable_h(
+    unsigned char* input,
+    float* temp,
+    int w, int h, int c)
+{
+    // Shared memory: row tile + left/right halo
+    __shared__ unsigned char tile[(SEP_TILE_W + 2 * RADIUS) * 3];
+
+    int x = blockIdx.x * SEP_TILE_W + threadIdx.x;
+    int y = blockIdx.y;  // One row per block.y
+
+    if (y >= h) return;
+
+    int tile_start = blockIdx.x * SEP_TILE_W - RADIUS;
+
+    //all threads load tile + halo with boundary clamping
+    for (int i = threadIdx.x; i < SEP_TILE_W + 2 * RADIUS; i += blockDim.x) {
+        int gx = tile_start + i;
+        if (gx < 0) gx = 0;
+        if (gx >= w) gx = w - 1;
+
+        int in_idx = (y * w + gx) * 3;
+        int t_idx = i * 3;
+        tile[t_idx]     = input[in_idx];
+        tile[t_idx + 1] = input[in_idx + 1];
+        tile[t_idx + 2] = input[in_idx + 2];
+    }
+
+    __syncthreads();  // Wait for all threads to finish loading
+
+    if (x >= w) return;
+
+    // Sum 31 horizontal neighbors from shared memory
+    float r = 0, g = 0, b = 0;
+    for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+        int t_idx = (threadIdx.x + RADIUS + dx) * 3;
+        r += tile[t_idx];
+        g += tile[t_idx + 1];
+        b += tile[t_idx + 2];
+    }
+
+    // Store to temp as float (preserves precision for vertical pass)
+    int out_idx = (y * w + x) * 3;
+    temp[out_idx]     = r / KSIZE;
+    temp[out_idx + 1] = g / KSIZE;
+    temp[out_idx + 2] = b / KSIZE;
+}
+
+// Vertical pass: blur along Y axis, output final result
+__global__ void blur_separable_v(
+    float* temp,
+    unsigned char* output,
+    int w, int h, int c)
+{
+    // Shared memory: column tile + top/bottom halo
+    __shared__ float tile[(SEP_TILE_H + 2 * RADIUS) * 3];
+
+    int x = blockIdx.x;
+    int y = blockIdx.y * SEP_TILE_H + threadIdx.x;
+
+    if (x >= w) return;
+
+    int tile_start = blockIdx.y * SEP_TILE_H - RADIUS;
+
+    //all threads load tile + halo with boundary clamping
+    for (int i = threadIdx.x; i < SEP_TILE_H + 2 * RADIUS; i += blockDim.x) {
+        int gy = tile_start + i;
+        if (gy < 0) gy = 0;
+        if (gy >= h) gy = h - 1;
+
+        int in_idx = (gy * w + x) * 3;
+        int t_idx = i * 3;
+        tile[t_idx]     = temp[in_idx];
+        tile[t_idx + 1] = temp[in_idx + 1];
+        tile[t_idx + 2] = temp[in_idx + 2];
+    }
+
+    __syncthreads();
+
+    if (y >= h) return;
+
+    // Sum 31 vertical neighbors from shared memory
+    float r = 0, g = 0, b = 0;
+    for (int dy = -RADIUS; dy <= RADIUS; dy++) {
+        int t_idx = (threadIdx.x + RADIUS + dy) * 3;
+        r += tile[t_idx];
+        g += tile[t_idx + 1];
+        b += tile[t_idx + 2];
+    }
+
+    // Store final result as unsigned char
+    int out_idx = (y * w + x) * 3;
+    output[out_idx]     = (unsigned char)(r / KSIZE);
+    output[out_idx + 1] = (unsigned char)(g / KSIZE);
+    output[out_idx + 2] = (unsigned char)(b / KSIZE);
+}
