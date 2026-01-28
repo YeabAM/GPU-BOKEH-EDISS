@@ -130,9 +130,9 @@ int main() {
     printf("Average GPU time per frame: %.2f ms\n", avg_ms);
 
     // Building videos
-    system("~/Project/ffmpeg -y -framerate 30 -i frames/%05d.jpg -pix_fmt yuv420p original_video.mp4");
+    system("~/GPU-BOKEH-EDISS/ffmpeg -y -framerate 30 -i frames/%05d.jpg -pix_fmt yuv420p original_video.mp4");
 
-    system("~/Project/ffmpeg -y -framerate 30 -i output_frames/%05d.png -pix_fmt yuv420p blurred_video.mp4");
+    system("~/GPU-BOKEH-EDISS/ffmpeg -y -framerate 30 -i output_frames/%05d.png -pix_fmt yuv420p blurred_video.mp4");
 
     return 0;
 }
