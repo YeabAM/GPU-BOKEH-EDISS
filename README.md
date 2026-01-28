@@ -106,30 +106,6 @@ Inside `main.cu` there is a mode variable:
 ```cpp
 int mode = 2;  // 0 = naive, 1 = shared, 2 = separable
 ```
-
-| Mode | Kernel | Description |
-|------|--------|-------------|
-| 0 | `blur_naive_31` | Global memory, 961 samples |
-| 1 | `blur_shared_31` | Shared memory, 961 samples |
-| 2 | `blur_separable_h` + `blur_separable_v` | Separable + shared memory, 62 samples |
-
-Change the mode value, recompile, and run to compare performance.
-
----
-
-## GPU Timing
-
-The project measures:
-- Blur kernel time
-- Merge kernel time
-- Full GPU pipeline per frame
-
-Timing uses CUDA events:
-```cpp
-cudaEventRecord(start);
-// blur + merge kernels
-cudaEventRecord(stop);
-cudaEventElapsedTime(&ms, start, stop);
 ```
 
 ---
