@@ -26,14 +26,14 @@ The project can process a full batch of frames and measures **per-frame GPU time
 
 ---
 
-## 📦 Dataset & Results
+## Dataset & Results
 
 Dataset and output videos available here:
 🔗 [Google Drive - Dataset & Results](https://drive.google.com/drive/folders/19qtjntF4VsYbGNFjB8XgPcqoTAl_U4TI?usp=sharing)
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 ```
 ├── main.cu                 # Main pipeline: load → blur → merge → save
 ├── kernels.cu              # Naive, shared-memory, and separable blur kernels
@@ -49,7 +49,7 @@ Dataset and output videos available here:
 
 ---
 
-## 🔧 Dependencies
+## Dependencies
 
 No external libraries besides:
 - stb_image.h (already included)
@@ -60,7 +60,7 @@ Everything required is in this repository (except FFmpeg).
 
 ---
 
-## 🚀 How to Compile
+## How to Compile
 
 From inside the project folder:
 ```bash
@@ -75,7 +75,7 @@ This produces:
 
 ---
 
-## ▶️ How to Run
+## How to Run
 
 Default run:
 ```bash
@@ -100,7 +100,7 @@ Average GPU time per frame: 2.32 ms
 
 ---
 
-## 🔀 Switching Between Kernels
+## Switching Between Kernels
 
 Inside `main.cu` there is a mode variable:
 ```cpp
@@ -117,7 +117,7 @@ Change the mode value, recompile, and run to compare performance.
 
 ---
 
-## ⏱️ GPU Timing
+## GPU Timing
 
 The project measures:
 - Blur kernel time
@@ -134,7 +134,7 @@ cudaEventElapsedTime(&ms, start, stop);
 
 ---
 
-## 🎬 Output Video
+## Output Video
 
 After processing, stitch frames into video using FFmpeg:
 ```bash
