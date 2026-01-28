@@ -65,12 +65,12 @@ Everything required is in this repository (except FFmpeg).
 From inside the project folder:
 ```bash
 module load cuda
-nvcc -O3 -arch=sm_80 main.cu utils.cpp kernels.cu -o bokeh
+nvcc main.cu utils.cpp kernels.cu -o final_project
 ```
 
 This produces:
 ```
-./bokeh
+./final_project
 ```
 
 ---
