@@ -79,7 +79,7 @@ This produces:
 
 Default run:
 ```bash
-./bokeh
+./final_project 90 (number of frames we have for the dataset we used)
 ```
 
 It will:
