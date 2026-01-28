@@ -133,14 +133,3 @@ cudaEventElapsedTime(&ms, start, stop);
 ```
 
 ---
-
-## Output Video
-
-After processing, stitch frames into video using FFmpeg:
-```bash
-ffmpeg -y -framerate 30 -i output_frames/%05d.png -pix_fmt yuv420p blurred_video.mp4
-```
-
-The output videos will appear as:
-- `original_video.mp4` - Original input
-- `blurred_video.mp4` - Processed with background blur
