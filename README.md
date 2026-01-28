@@ -105,7 +105,5 @@ Average GPU time per frame: 2.32 ms
 Inside `main.cu` there is a mode variable:
 ```cpp
 int mode = 2;  // 0 = naive, 1 = shared, 2 = separable
-```
-```
 
 ---
