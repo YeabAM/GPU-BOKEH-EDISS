@@ -78,6 +78,10 @@ This produces:
 ## How to Run
 
 Default run:
+Make the ffmpeg library module executable
+```bash
+chmod +x ffmpeg
+```
 ```bash
 ./final_project 90 (number of frames we have for the dataset we used)
 ```
