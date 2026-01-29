@@ -29,7 +29,8 @@ The project can process a full batch of frames and measures **per-frame GPU time
 ## Dataset & Results
 
 Dataset and output videos available here:
-🔗 [Google Drive - Dataset & Results](https://drive.google.com/drive/folders/19qtjntF4VsYbGNFjB8XgPcqoTAl_U4TI?usp=sharing)
+[Google Drive - Dataset & Results](https://drive.google.com/drive/folders/19qtjntF4VsYbGNFjB8XgPcqoTAl_U4TI?usp=sharing)
+ [Dataset](https://www.kaggle.com/datasets/mengzj/davis-data?resource=download)
 
 ---
 
