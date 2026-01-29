@@ -1,4 +1,4 @@
-# GPU-Based Depth-Aware Background Blur (CUDA)
+# GPU-Based Background Blur (Bokeh effect) (CUDA)
 
 This project implements a **DSLR-style portrait background blur** using CUDA.
 The pipeline processes a sequence of video frames, blurs the background using a
